@@ -1,0 +1,34 @@
+cat > test.sh << EOF
+#!/bin/bash
+sudo apt-get update && sudo apt-get install -y ca-certificates curl gnupg
+
+if [ -d "project-armageddon" ]; then
+    echo "Deleting existing project-armageddon directory..."
+    rm -rf "project-armageddon"
+fi
+
+mkdir project-armageddon
+cd project-armageddon
+git clone https://github.com/PedroCamargo-dev/armageddon-api.git
+
+if [ -f "/etc/apt/keyrings/nodesource.gpg" ]; then
+    echo "nodesource.gpg already exists. Overwriting..."
+    sudo rm /etc/apt/keyrings/nodesource.gpg
+fi
+
+curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+sudo apt-get update && sudo apt-get install nodejs -y
+
+cd $HOME/project-armageddon/armageddon-api
+chmod 777 -R $HOME/project-armageddon/
+npm install
+npm run build
+npm run start:prod
+EOF
+
+chmod +x test.sh
+echo "Script test.sh created and made executable."
+
+./test.sh
+echo "Script test.sh executed."

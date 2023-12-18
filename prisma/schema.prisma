@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model System {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String?
+  username    String
+  password    String
+  IP          String
+  portSSH     Int
+  portSocket  Int
+  status      String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  systemInfo  SystemInfo[]
+}
+
+model SystemInfo {
+  id        Int      @id @default(autoincrement())
+  systemId  Int
+  cpu       String
+  ram       String
+  disk      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  system    System   @relation(fields: [systemId], references: [id])
+}

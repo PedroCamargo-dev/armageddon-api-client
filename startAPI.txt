@@ -1,0 +1,13 @@
+cat > startAPI.sh << EOF
+#!/bin/bash
+cd $HOME/project-armageddon/armageddon-api
+npm install
+npm run build
+npm run start:prod
+EOF
+
+chmod +x startAPI.sh
+echo "Script startAPI.sh created and made executable."
+
+trap "" HUP nohup ./startAPI.sh > /dev/null 2>&1 &
+echo "Script startAPI.sh executed."
