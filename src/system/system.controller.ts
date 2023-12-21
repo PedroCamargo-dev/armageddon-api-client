@@ -26,6 +26,11 @@ export class SystemController {
     return this.systemService.metricsSystems(server);
   }
 
+  @Get('metrics')
+  findAllSystemInfo() {
+    return this.systemService.findAllSystemInfo();
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.systemService.remove(+id);

@@ -8,18 +8,14 @@ import { io, Socket } from 'socket.io-client';
 @Injectable()
 export class SystemService {
   private socket: Socket;
+
   constructor(
     private prisma: PrismaService,
     private sshClient: SshService,
   ) {}
 
-  private connectSocket(server) {
-    this.socket = io(server);
-    return this.socket;
-  }
-
   async create(createSystemDto: CreateSystemDto) {
-    const createSystem = this.prisma.system.create({
+    const createSystem = await this.prisma.system.create({
       data: createSystemDto,
     });
 
@@ -59,14 +55,222 @@ export class SystemService {
     return allSystems;
   }
 
+  findAllSystemInfo() {
+    const allSystems = this.prisma.system.findMany();
+    if (allSystems) {
+      console.log('All systems fetched successfully');
+    }
+    return allSystems;
+  }
+
   async metricsSystems(server) {
     const searchServers = await this.findByIds(server.ids);
+
     for (let i = 0; i < searchServers.length; i++) {
-      const socket = io(
+      this.socket = io(
         `http://${searchServers[i].IP}:${searchServers[i].portSocket}`,
       );
-      socket.on('osInfo', (message) => {
-        console.log('Received message:', message);
+
+      server.datas.forEach(async (data) => {
+        this.socket.on(data, async (res) => {
+          if (data === 'Memory') {
+            const existingMemory = await this.prisma.memory.findFirst({
+              where: {
+                systemId: searchServers[i].id,
+              },
+            });
+
+            if (existingMemory) {
+              const updatedMemory = await this.prisma.memory.update({
+                where: {
+                  id: existingMemory.id,
+                },
+                data: res,
+              });
+
+              return { ...updatedMemory };
+            } else {
+              const newMemory = await this.prisma.memory.create({
+                data: {
+                  system: {
+                    connect: {
+                      id: searchServers[i].id,
+                    },
+                  },
+                  ...res,
+                },
+              });
+
+              return { ...newMemory };
+            }
+          } else if (data === 'CPU') {
+            const existingCPU = await this.prisma.cPU.findFirst({
+              where: {
+                systemId: searchServers[i].id,
+              },
+            });
+
+            if (existingCPU) {
+              const updatedCPU = await this.prisma.cPU.update({
+                where: {
+                  id: existingCPU.id,
+                },
+                data: {
+                  manufacturer: res.manufacturer,
+                  brand: res.brand,
+                  vendor: res.vendor,
+                  family: res.family,
+                  model: res.model,
+                  stepping: res.stepping,
+                  revision: res.revision,
+                  voltage: res.voltage,
+                  speed: res.speed,
+                  speedMin: res.speedMin,
+                  speedMax: res.speedMax,
+                  governor: res.governor,
+                  cores: res.cores,
+                  physicalCores: res.physicalCores,
+                  performanceCores: res.performanceCores,
+                  efficiencyCores: res.efficiencyCores,
+                  processors: res.processors,
+                  socket: res.socket,
+                  flags: res.flags,
+                  virtualization: res.virtualization,
+                  avgLoad: res.avgLoad,
+                  currentLoad: res.currentLoad,
+                  currentLoadUser: res.currentLoadUser,
+                  currentLoadSystem: res.currentLoadSystem,
+                  currentLoadNice: res.currentLoadNice,
+                  currentLoadIdle: res.currentLoadIdle,
+                  currentLoadIrq: res.currentLoadIrq,
+                  currentLoadSteal: res.currentLoadSteal,
+                  currentLoadGuest: res.currentLoadGuest,
+                  rawCurrentLoad: res.rawCurrentLoad,
+                  rawCurrentLoadUser: res.rawCurrentLoadUser,
+                  rawCurrentLoadSystem: res.rawCurrentLoadSystem,
+                  rawCurrentLoadNice: res.rawCurrentLoadNice,
+                  rawCurrentLoadIdle: res.rawCurrentLoadIdle,
+                  rawCurrentLoadIrq: res.rawCurrentLoadIrq,
+                  rawCurrentLoadSteal: res.rawCurrentLoadSteal,
+                  rawCurrentLoadGuest: res.rawCurrentLoadGuest,
+                },
+              });
+
+              return { ...updatedCPU };
+            } else {
+              const newCPU = await this.prisma.cPU.create({
+                data: {
+                  system: {
+                    connect: {
+                      id: searchServers[i].id,
+                    },
+                  },
+                  manufacturer: res.manufacturer,
+                  brand: res.brand,
+                  vendor: res.vendor,
+                  family: res.family,
+                  model: res.model,
+                  stepping: res.stepping,
+                  revision: res.revision,
+                  voltage: res.voltage,
+                  speed: res.speed,
+                  speedMin: res.speedMin,
+                  speedMax: res.speedMax,
+                  governor: res.governor,
+                  cores: res.cores,
+                  physicalCores: res.physicalCores,
+                  performanceCores: res.performanceCores,
+                  efficiencyCores: res.efficiencyCores,
+                  processors: res.processors,
+                  socket: res.socket,
+                  flags: res.flags,
+                  virtualization: res.virtualization,
+                  avgLoad: res.avgLoad,
+                  currentLoad: res.currentLoad,
+                  currentLoadUser: res.currentLoadUser,
+                  currentLoadSystem: res.currentLoadSystem,
+                  currentLoadNice: res.currentLoadNice,
+                  currentLoadIdle: res.currentLoadIdle,
+                  currentLoadIrq: res.currentLoadIrq,
+                  currentLoadSteal: res.currentLoadSteal,
+                  currentLoadGuest: res.currentLoadGuest,
+                  rawCurrentLoad: res.rawCurrentLoad,
+                  rawCurrentLoadUser: res.rawCurrentLoadUser,
+                  rawCurrentLoadSystem: res.rawCurrentLoadSystem,
+                  rawCurrentLoadNice: res.rawCurrentLoadNice,
+                  rawCurrentLoadIdle: res.rawCurrentLoadIdle,
+                  rawCurrentLoadIrq: res.rawCurrentLoadIrq,
+                  rawCurrentLoadSteal: res.rawCurrentLoadSteal,
+                  rawCurrentLoadGuest: res.rawCurrentLoadGuest,
+                },
+              });
+
+              return { ...newCPU };
+            }
+          } else if (data === 'osInfo') {
+            const existingOS = await this.prisma.systemInfo.findFirst({
+              where: {
+                systemId: searchServers[i].id,
+              },
+            });
+
+            if (existingOS) {
+              const updatedOS = await this.prisma.systemInfo.update({
+                where: {
+                  id: existingOS.id,
+                },
+                data: res,
+              });
+
+              return { ...updatedOS };
+            } else {
+              const newOS = await this.prisma.systemInfo.create({
+                data: {
+                  system: {
+                    connect: {
+                      id: searchServers[i].id,
+                    },
+                  },
+                  ...res,
+                },
+              });
+
+              return { ...newOS };
+            }
+          } else if (data === 'NetworkStats') {
+            const existingNetwork =
+              await this.prisma.networkInterfaceData.findFirst({
+                where: {
+                  systemId: searchServers[i].id,
+                },
+              });
+
+            if (existingNetwork) {
+              const updatedNetwork =
+                await this.prisma.networkInterfaceData.update({
+                  where: {
+                    id: existingNetwork.id,
+                  },
+                  data: res,
+                });
+
+              return { ...updatedNetwork };
+            } else {
+              const newNetwork = await this.prisma.networkInterfaceData.create({
+                data: {
+                  system: {
+                    connect: {
+                      id: searchServers[i].id,
+                    },
+                  },
+                  ...res,
+                },
+              });
+
+              return { ...newNetwork };
+            }
+          }
+        });
       });
     }
 

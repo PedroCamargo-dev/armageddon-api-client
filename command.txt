@@ -22,9 +22,6 @@ sudo apt-get update && sudo apt-get install nodejs -y
 
 cd $HOME/project-armageddon/armageddon-api
 chmod 777 -R $HOME/project-armageddon/
-npm install
-npm run build
-npm run start:prod
 EOF
 
 chmod +x test.sh

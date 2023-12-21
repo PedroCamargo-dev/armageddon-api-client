@@ -8,27 +8,144 @@ datasource db {
 }
 
 model System {
-  id          Int          @id @default(autoincrement())
-  name        String
-  description String?
-  username    String
-  password    String
-  IP          String
-  portSSH     Int
-  portSocket  Int
-  status      String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  systemInfo  SystemInfo[]
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  description          String?
+  username             String
+  password             String
+  IP                   String                 @unique
+  portSSH              Int
+  portSocket           Int
+  status               String
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  memories             Memory[]
+  CPU                  CPU[]
+  SystemInfo           SystemInfo[]
+  Filesystem           Filesystem[]
+  NetworkInterfaceData NetworkInterfaceData[]
 }
 
-model SystemInfo {
-  id        Int      @id @default(autoincrement())
-  systemId  Int
-  cpu       String
-  ram       String
-  disk      String
+model Memory {
+  id        Int      @id @unique @default(autoincrement())
+  total     BigInt
+  free      BigInt
+  used      BigInt
+  active    BigInt
+  available BigInt
+  buffers   BigInt
+  cached    BigInt
+  slab      BigInt
+  buffcache BigInt
+  swaptotal BigInt
+  swapused  BigInt
+  swapfree  BigInt
+  writeback BigInt
+  dirty     BigInt
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   system    System   @relation(fields: [systemId], references: [id])
+  systemId  Int
+}
+
+model CPU {
+  id                   Int      @id @unique @default(autoincrement())
+  manufacturer         String
+  brand                String
+  vendor               String
+  family               String
+  model                String
+  stepping             String
+  revision             String?
+  voltage              String?
+  speed                Int
+  speedMin             Int?
+  speedMax             Int?
+  governor             String?
+  cores                Int
+  physicalCores        Int
+  performanceCores     Int
+  efficiencyCores      Int
+  processors           Int
+  socket               String?
+  flags                String
+  virtualization       Boolean
+  avgLoad              Float
+  currentLoad          Float
+  currentLoadUser      Float
+  currentLoadSystem    Float
+  currentLoadNice      Float
+  currentLoadIdle      Float
+  currentLoadIrq       Float
+  currentLoadSteal     Float
+  currentLoadGuest     Float
+  rawCurrentLoad       BigInt
+  rawCurrentLoadUser   BigInt
+  rawCurrentLoadSystem BigInt
+  rawCurrentLoadNice   BigInt
+  rawCurrentLoadIdle   BigInt
+  rawCurrentLoadIrq    BigInt
+  rawCurrentLoadSteal  BigInt
+  rawCurrentLoadGuest  BigInt
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  system               System   @relation(fields: [systemId], references: [id])
+  systemId             Int
+}
+
+model SystemInfo {
+  id          Int      @id @unique @default(autoincrement())
+  platform    String
+  distro      String
+  release     String
+  codename    String
+  kernel      String
+  arch        String
+  hostname    String
+  fqdn        String
+  codepage    String
+  logofile    String
+  serial      String
+  build       String?
+  servicepack String?
+  uefi        Boolean
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  system      System   @relation(fields: [systemId], references: [id])
+  systemId    Int
+}
+
+model Filesystem {
+  id        Int      @id @unique @default(autoincrement())
+  fs        String
+  type      String
+  size      BigInt
+  used      BigInt
+  available BigInt
+  use       Float
+  mount     String
+  rw        Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  system    System   @relation(fields: [systemId], references: [id])
+  systemId  Int
+}
+
+model NetworkInterfaceData {
+  id                 Int      @id @unique @default(autoincrement())
+  iface              String
+  operstate          String
+  rx_bytes           Int
+  rx_dropped         Int
+  rx_errors          Int
+  tx_bytes           Int
+  tx_dropped         Int
+  tx_errors          Int
+  rx_sec             Int?
+  tx_sec             Int?
+  ms                 Int
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  system             System   @relation(fields: [systemId], references: [id])
+  systemId           Int
 }
