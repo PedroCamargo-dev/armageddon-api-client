@@ -11,24 +11,19 @@ export class SystemController {
     return this.systemService.create(createSystemDto);
   }
 
+  @Get('metrics')
+  async findAllSystemInfo() {
+    return await this.systemService.findAllSystemInfo();
+  }
+
   @Get(':id')
   async startAPIPC(@Param('id') id: string) {
     return this.systemService.startAPI(+id);
   }
 
-  @Get()
-  findAll() {
-    return this.systemService.findAll();
-  }
-
   @Post('metrics')
   metricsSystems(@Body() server) {
     return this.systemService.metricsSystems(server);
-  }
-
-  @Get('metrics')
-  findAllSystemInfo() {
-    return this.systemService.findAllSystemInfo();
   }
 
   @Delete(':id')

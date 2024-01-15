@@ -55,12 +55,31 @@ export class SystemService {
     return allSystems;
   }
 
-  findAllSystemInfo() {
-    const allSystems = this.prisma.system.findMany();
-    if (allSystems) {
-      console.log('All systems fetched successfully');
-    }
-    return allSystems;
+  async findAllSystemInfo() {
+    const allSystems = this.prisma.system.findMany({
+      select: {
+        id: true,
+        name: true,
+        CPU: {
+          select: {
+            currentLoad: true,
+          },
+        },
+        memories: {
+          select: {
+            used: true,
+          },
+        },
+        NetworkInterfaceData: {
+          select: {
+            rx_sec: true,
+            tx_sec: true,
+          },
+        },
+      },
+    });
+
+    return this.toObject(await allSystems);
   }
 
   async metricsSystems(server) {
@@ -298,5 +317,13 @@ export class SystemService {
       console.log('System deleted successfully');
     }
     return deleteSystem;
+  }
+
+  private toObject(valueData: any) {
+    return JSON.parse(
+      JSON.stringify(valueData, (key: string, value: any) =>
+        typeof value === 'bigint' ? value.toString() : value,
+      ),
+    );
   }
 }

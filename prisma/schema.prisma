@@ -135,14 +135,14 @@ model NetworkInterfaceData {
   id                 Int      @id @unique @default(autoincrement())
   iface              String
   operstate          String
-  rx_bytes           Int
-  rx_dropped         Int
-  rx_errors          Int
-  tx_bytes           Int
-  tx_dropped         Int
-  tx_errors          Int
-  rx_sec             Int?
-  tx_sec             Int?
+  rx_bytes           Float
+  rx_dropped         Float
+  rx_errors          Float
+  tx_bytes           Float
+  tx_dropped         Float
+  tx_errors          Float
+  rx_sec             Float?
+  tx_sec             Float?
   ms                 Int
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
