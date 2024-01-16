@@ -26,7 +26,12 @@ export class SshService {
               .on('data', (data: any) => {
                 console.log('STDOUT: ' + data);
 
-                if (data.includes('password')) {
+                if (
+                  data.includes('password') ||
+                  data.includes('Password') ||
+                  data.includes('Password:') ||
+                  data.includes('password:')
+                ) {
                   stream.write(`${systemData.password}\n`);
                 }
 

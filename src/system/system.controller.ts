@@ -11,6 +11,11 @@ export class SystemController {
     return this.systemService.create(createSystemDto);
   }
 
+  @Get()
+  findAll() {
+    return this.systemService.findAll();
+  }
+
   @Get('metrics')
   async findAllSystemInfo() {
     return await this.systemService.findAllSystemInfo();
