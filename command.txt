@@ -1,6 +1,15 @@
 cat > test.sh << EOF
 #!/bin/bash
-sudo apt-get update && sudo apt-get install -y ca-certificates curl gnupg
+
+# Check if the operating system is Linux or macOS
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    sudo apt-get update && sudo apt-get install -y ca-certificates curl gnupg
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    brew update && brew install curl gnupg
+else
+    echo "Unsupported operating system."
+    exit 1
+fi
 
 if [ -d "project-armageddon" ]; then
     echo "Deleting existing project-armageddon directory..."
@@ -11,17 +20,22 @@ mkdir project-armageddon
 cd project-armageddon
 git clone https://github.com/PedroCamargo-dev/armageddon-api.git
 
-if [ -f "/etc/apt/keyrings/nodesource.gpg" ]; then
-    echo "nodesource.gpg already exists. Overwriting..."
-    sudo rm /etc/apt/keyrings/nodesource.gpg
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    if [ -f "/etc/apt/keyrings/nodesource.gpg" ]; then
+        echo "nodesource.gpg already exists. Overwriting..."
+        sudo rm /etc/apt/keyrings/nodesource.gpg
+    fi
+
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+    sudo apt-get update && sudo apt-get install nodejs -y
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    curl -O https://nodejs.org/dist/v20.11.0/node-v20.11.0.pkg && sudo installer -pkg node-v20.11.0.pkg -target /
+else
+    echo "Unsupported operating system."
+    exit 1
 fi
 
-curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
-sudo apt-get update && sudo apt-get install nodejs -y
-
-cd $HOME/project-armageddon/armageddon-api
-chmod 777 -R $HOME/project-armageddon/
 EOF
 
 chmod +x test.sh
