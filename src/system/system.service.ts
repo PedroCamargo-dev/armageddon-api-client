@@ -47,12 +47,15 @@ export class SystemService {
     return system;
   }
 
-  findAll() {
-    const allSystems = this.prisma.system.findMany();
-    if (allSystems) {
-      console.log('All systems fetched successfully');
+  async findAll() {
+    const allSystems = await this.prisma.system.findMany();
+
+    if (allSystems.length === 0) {
+      return 'Nenhum sistema localizado';
     }
-    return allSystems;
+    if (allSystems) {
+      return allSystems;
+    }
   }
 
   async findAllSystemInfo() {
@@ -293,7 +296,7 @@ export class SystemService {
       });
     }
 
-    return 'asdasds';
+    return 'Obtendo dados dos sistemas...';
   }
 
   async findByIds(ids: number[]) {
