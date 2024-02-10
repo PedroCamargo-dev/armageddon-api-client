@@ -23,7 +23,7 @@ export class SystemService {
       console.log('System created successfully');
       await this.sshClient.exec(
         createSystemDto,
-        fs.readFileSync('./command.txt', 'utf8'),
+        process.env.INSTALL_SCRIPT,
         true,
       );
     }
