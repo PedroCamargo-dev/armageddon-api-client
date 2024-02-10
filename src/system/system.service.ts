@@ -23,7 +23,7 @@ export class SystemService {
       console.log('System created successfully');
       await this.sshClient.exec(
         createSystemDto,
-        process.env.INSTALL_SCRIPT,
+        `cat > test.sh << EOF\n#!/bin/bash\n\n# Check if the operating system is Linux or macOS\nif [[ "$OSTYPE" == "linux-gnu"* ]]; then\n    sudo apt-get update && sudo apt-get install -y ca-certificates curl gnupg\nelif [[ "$OSTYPE" == "darwin"* ]]; then\n    brew update && brew install curl gnupg\nelse\n    echo "Unsupported operating system."\n    exit 1\nfi\n\nif [ -d "project-armageddon" ]; then\n    echo "Deleting existing project-armageddon directory..."\n    rm -rf "project-armageddon"\nfi\n\nmkdir project-armageddon\ncd project-armageddon\ngit clone https://github.com/PedroCamargo-dev/armageddon-api.git\n\nif [[ "$OSTYPE" == "linux-gnu"* ]]; then\n    if [ -f "/etc/apt/keyrings/nodesource.gpg" ]; then\n        echo "nodesource.gpg already exists. Overwriting..."\n        sudo rm /etc/apt/keyrings/nodesource.gpg\n    fi\n\n    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg\n    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list\n    sudo apt-get update && sudo apt-get install nodejs -y\nelif [[ "$OSTYPE" == "darwin"* ]]; then\n    curl -O https://nodejs.org/dist/v20.11.0/node-v20.11.0.pkg && sudo installer -pkg node-v20.11.0.pkg -target /\nelse\n    echo "Unsupported operating system."\n    exit 1\nfi\n\nEOF\n\nchmod +x test.sh\necho "Script test.sh created and made executable."\n\n./test.sh\necho "Script test.sh executed."`,
         true,
       );
     }
